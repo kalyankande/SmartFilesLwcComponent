@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>CLSFD0001</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CLSFD0001</shortDescription>
+        <value>No Files</value>
+    </labels>
+    <labels>
+        <fullName>CLSFD0002</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CLSFD0002</shortDescription>
+        <value>Record does not exist</value>
+    </labels>
+    <labels>
+        <fullName>CLSFD0003</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CLSFD0003</shortDescription>
+        <value>Please check record Id and object</value>
+    </labels>
+    <labels>
+        <fullName>CLSFD0004</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CLSFD0004</shortDescription>
+        <value>Please check the custom metadata SD_Setting</value>
+    </labels>
+    <labels>
+        <fullName>CLSFD0005</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CLSFD0005</shortDescription>
+        <value>Please select a record</value>
+    </labels>
+</CustomLabels>

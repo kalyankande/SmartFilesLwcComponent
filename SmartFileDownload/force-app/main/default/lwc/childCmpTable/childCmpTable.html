@@ -1,0 +1,103 @@
+<template>
+    <lightning-spinner if:true={bSpinner} alternative-text="Loading" size="small">
+  </lightning-spinner>
+    
+    <div class="slds-theme_default">
+      
+      <!-- Page Header -->
+      <lightning-layout horizontal-align="spread" vertical-align="center" class="slds-page-header slds-card_boundary"
+        multiple-rows>
+        <lightning-layout-item class="custom-padding">
+          <lightning-layout horizontal-align="start" vertical-align="center">
+            <lightning-layout-item>
+              <!-- Page Icon -->
+              <lightning-icon icon-name={iconName} alternative-text={title} title={title}></lightning-icon>
+            </lightning-layout-item>
+            <lightning-layout-item padding="horizontal-small">
+              <h1>
+                <!-- Page Title -->
+                <span class="slds-page-header__title slds-truncate" title={title}>{title}</span>
+              </h1>
+              <!-- Pop over to show the warnings -->
+              <template if:true={bWarning}>
+                <div class="slds-media slds-media_center slds-has-flexi-truncate slds-popover_warning">
+                  <div class="slds-media__body">
+                    <p class="slds-page-header__name-meta">{stCustomLabel}</p>
+                  </div>
+                  <div class="slds-media__figure">
+                    <lightning-icon icon-name="utility:warning" size="small" alternative-text="Warning!" title="Warning"
+                      variant="warning"></lightning-icon>
+                  </div>
+                </div>
+              </template>
+            </lightning-layout-item>
+          </lightning-layout>
+        </lightning-layout-item>
+        <template if:true={bIconFilter}>
+          <lightning-layout-item class="custom-align custom-padding">
+            <lightning-button-group>
+              <!-- Iterate over the list of icons and display them -->
+              <template for:each={icons} for:item="icon">
+                <lightning-button key={icon.name} label={icon.name} icon-name={icon.filetype} icon-position="left" 
+                  variant={icon.variant} onclick={handleTypeFilter}></lightning-button>
+              </template>
+              <lightning-button-icon icon-name="utility:close" onclick={updateToDefault} variant="border-filled"
+                alternative-text="Close"></lightning-button-icon>
+            </lightning-button-group>
+          </lightning-layout-item>
+        </template>
+        <lightning-layout-item class="custom-align custom-padding">
+          <!-- Page Buttons -->
+  
+          <lightning-button-group>
+            <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh"
+              onclick={handleRefresh} variant="border-filled"></lightning-button-icon>
+            <lightning-button label={buttonLabelv2} title={buttonLabelv2} onclick={handleClickv3} disabled={bDisabled}>
+            </lightning-button>
+            <lightning-button label={buttonLabel} title={buttonLabel} onclick={handleClickv2} disabled={bDisabled}>
+            </lightning-button>
+            <!-- Create a dropdown button menu with options -->
+            <lightning-button-menu alternative-text="Show menu" menu-alignment="auto" variant="border-filled">
+              <lightning-file-upload name="fileUploader" multiple record-id={recordId} class="custom-fileupload"
+                onuploadfinished={handleRefresh}></lightning-file-upload>
+              <lightning-menu-item value="View" label="Standard View" onclick={handleMenuSelect}></lightning-menu-item>
+            </lightning-button-menu>
+          </lightning-button-group>
+        </lightning-layout-item>
+      </lightning-layout>
+  
+    </div>
+  
+  
+    <template if:true={bEnableTable}>
+      <div class="ligtning-table-cc">
+  
+        <lightning-datatable key-field="stDownloadId" 
+        data={finalData} 
+        columns={columns} 
+        selected-rows={selectedData}
+        sorted-by={sortedBy} 
+        sorted-direction={sortedDirection} 
+        onsort={updateColumnSorting}
+        onrowaction={previewHandler}
+        onrowselection={getSelectedName} 
+        show-row-number-column="true" 
+        class="custom-table">
+        </lightning-datatable>
+      </div>
+    </template>
+    <template if:true={bError}>
+      <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
+          <lightning-layout horizontal-align="center" vertical-align="center" multiple-rows>
+              <lightning-layout-item size="auto">
+                  <lightning-icon icon-name="utility:error" size="small" alternative-text="Error"></lightning-icon>
+              </lightning-layout-item>
+              <lightning-layout-item size="auto">
+                  <h2>Error: {stErrorMessage}</h2>
+              </lightning-layout-item>
+          </lightning-layout>
+      </div>
+  </template>
+  
+    
+  </template>

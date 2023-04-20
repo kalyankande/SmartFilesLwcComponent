@@ -1,0 +1,10 @@
+.slds-hide {
+    display: none;
+}
+.slds-show {
+    display: block;
+}
+.custom-header {
+    display: flex;
+    justify-content: flex-end;
+}
