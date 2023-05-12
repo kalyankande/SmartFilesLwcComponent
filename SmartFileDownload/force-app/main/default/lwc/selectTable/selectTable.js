@@ -1,19 +1,15 @@
-import {
-    LightningElement,
-    api,
-    track
-} from 'lwc';
+import { LightningElement, api, track } from "lwc";
 
 export default class SmartDownload extends LightningElement {
     // Attributes to display details and actions
-    @api title = 'Smart Download';
-    @api iconName = 'standard:document';
-    @api buttonLabel = 'Download All';
-    @api buttonLabelv2 = 'Select';
+    @api title = "Smart Download";
+    @api iconName = "standard:document";
+    @api buttonLabel = "Download All";
+    @api buttonLabelv2 = "Select";
     @track bEnableDownloadAll = true;
-    @track bEnableSelect = false
+    @track bEnableSelect = false;
     @api bEnableFilter;
-    @track modalClass = 'slds-hide';
+    @track modalClass = "slds-hide";
 
     // Attributes to store platform details
     @api recordId;
@@ -25,11 +21,10 @@ export default class SmartDownload extends LightningElement {
     @track bError = false;
 
     handleClickv3() {
-        console.log('working');
+        console.log("working");
         this.bEnableSelect = true;
-        this.modalClass = 'slds-show';
+        this.modalClass = "slds-show";
         this.bEnableFilter = true;
-
     }
 
     handleClick() {
@@ -40,15 +35,11 @@ export default class SmartDownload extends LightningElement {
     handleRefresh() {
         this.bEnableSelect = true;
         this.template.querySelector("c-child-cmp-table").handleRefresh();
-
-
-
     }
 
     closeModal() {
-        this.modalClass = 'slds-hide';
+        this.modalClass = "slds-hide";
 
         // Handle button click action
     }
-
 }

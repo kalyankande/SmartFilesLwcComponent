@@ -1,67 +1,68 @@
 <template>
-  <!-- Page Markup -->
-  <article class="slds-card slds-card_boundary">
-      <!-- Page header -->
-      <lightning-layout horizontal-align="spread" vertical-align="center" class="slds-page-header" multiple-rows="true">
-        <lightning-layout-item class="slds-show_medium">
-          <lightning-layout horizontal-align="start" vertical-align="center">
-              <lightning-layout-item>
-                  <!-- Page Icon -->
-                  <lightning-icon icon-name={iconName} alternative-text={title} title={title} size="small"></lightning-icon>
-              </lightning-layout-item>
-              <lightning-layout-item padding="horizontal-small">
-                  <!-- Page Title -->
-                  <h2 class="slds-card__header-link">
-                      <span class="slds-card__header-title slds-truncate" title={title}>{title}</span>
-                  </h2>
-              </lightning-layout-item>
-          </lightning-layout>
-      </lightning-layout-item>
-      
-      <lightning-layout-item class="custom-align">
-          <!-- To display Spinner when loading -->
-          <template if:true={bSpinner}>
-              <lightning-spinner alternative-text="Loading" size="small" variant="brand" class="custom-position"></lightning-spinner>
-          </template>
-          
-          <!-- Page Buttons -->
-          <lightning-button-group>
-             <!-- <template if:true={bEnableSelect}> -->
-                  <!-- Button 1 -->
-                  <lightning-button label={buttonLabelv2} title={buttonLabelv2} onclick={handleClickv3} ></lightning-button>
-              <!-- </template> -->
-              <template if:true={bEnableDownloadAll}>
-                  <!-- Button 2 -->
-                  <lightning-button label={buttonLabel} title={buttonLabel} onclick={handleClick} disabled={bDisabled}></lightning-button>
-              </template>
-              <lightning-button-icon icon-name="utility:refresh"  alternative-text="Refresh" title="Refresh" onclick={handleRefresh} variant="border-filled"></lightning-button-icon>
-          </lightning-button-group>
-      </lightning-layout-item>
-  </lightning-layout>
-</article>
+    <!-- Page Markup -->
+    <article class="slds-card slds-card_boundary">
+        <!-- Page header -->
+        <lightning-layout horizontal-align="spread" vertical-align="center" class="slds-page-header"
+            multiple-rows="true">
+            <lightning-layout-item class="slds-show_medium">
+                <lightning-layout horizontal-align="start" vertical-align="center">
+                    <lightning-layout-item>
+                        <!-- Page Icon -->
+                        <lightning-icon icon-name={iconName} alternative-text={title} title={title}
+                            size="small"></lightning-icon>
+                    </lightning-layout-item>
+                    <lightning-layout-item padding="horizontal-small">
+                        <!-- Page Title -->
+                        <h2 class="slds-card__header-link">
+                            <span class="slds-card__header-title slds-truncate" title={title}>{title}</span>
+                        </h2>
+                    </lightning-layout-item>
+                </lightning-layout>
+            </lightning-layout-item>
+
+            <lightning-layout-item class="custom-align">
+                <!-- To display Spinner when loading -->
+                <template if:true={bSpinner}>
+                    <lightning-spinner alternative-text="Loading" size="small" variant="brand"
+                        class="custom-position"></lightning-spinner>
+                </template>
+
+                <!-- Page Buttons -->
+                <lightning-button-group>
+                    <!-- <template if:true={bEnableSelect}> -->
+                    <!-- Button 1 -->
+                    <lightning-button label={buttonLabelv2} title={buttonLabelv2}
+                        onclick={handleClickv3}></lightning-button>
+                    <!-- </template> -->
+                    <template if:true={bEnableDownloadAll}>
+                        <!-- Button 2 -->
+                        <lightning-button label={buttonLabel} title={buttonLabel} onclick={handleClick}
+                            disabled={bDisabled}></lightning-button>
+                    </template>
+                    <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh"
+                        onclick={handleRefresh} variant="border-filled"></lightning-button-icon>
+                </lightning-button-group>
+            </lightning-layout-item>
+        </lightning-layout>
+    </article>
     <div class={modalClass}>
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_large">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_large">
             <div class="slds-modal__container">
                 <header class="custom-header">
                     <!-- Button to close the Modal -->
-                    <lightning-button-icon icon-name="utility:close"
-                                           onclick={closeModal}
-                                           alternative-text="Close"
-                                           variant="bare-inverse"
-                                           class="slds-modal__close"></lightning-button-icon>
+                    <lightning-button-icon icon-name="utility:close" onclick={closeModal} alternative-text="Close"
+                        variant="bare-inverse" class="slds-modal__close"></lightning-button-icon>
                 </header>
                 <div>
                     <template if:true={bEnableSelect}>
-                    <!-- Main Table component to display the records to select and download -->
-                    <c-child-cmp-table
+                        <!-- Main Table component to display the records to select and download -->
+                        <c-child-cmp-table record-id={recordId} b-icon-filter={bEnableFilter}>
 
-                        record-id={recordId}
-                        b-icon-filter={bEnableFilter}> 
-
-                    </c-child-cmp-table>
+                        </c-child-cmp-table>
                     </template>
                 </div>
-            </div> 
+            </div>
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
     </div>

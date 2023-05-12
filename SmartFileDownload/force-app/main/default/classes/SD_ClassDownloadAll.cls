@@ -13,16 +13,16 @@
 
 public with sharing class SD_ClassDownloadAll {
     
-/****************************************************************************************************
-* @desc     	: Returns the attachments under a generic object
-* @param    	: stRecordId
-* @return   	: LIST<detailsClass> wrapper object
-****************************************************************************************************/
+    /****************************************************************************************************
+    * @desc     	: Returns the attachments under a generic object
+    * @param    	: stRecordId
+    * @return   	: LIST<detailsClass> wrapper object
+    ****************************************************************************************************/
     
     @AuraEnabled
     public static List<detailsClass> getAttachments(String stRecordId) {
         
-            String theme = UserInfo.getUiThemeDisplayed();
+        String theme = UserInfo.getUiThemeDisplayed();
         String CLSFD0001 = System.Label.CLSFD0001;  // No Files
         String CLSFD0002 = System.Label.CLSFD0002;  // Record does not exist
         String CLSFD0003 = System.Label.CLSFD0003;  // Please check record Id and object
