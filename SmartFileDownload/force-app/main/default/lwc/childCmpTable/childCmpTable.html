@@ -98,18 +98,10 @@
     </div>
     <template if:true={blnEnableTable}>
         <div class="ligtning-table-cc">
-            <lightning-datatable key-field="stDownloadId" 
-                data-id="datatable" 
-                data={list_FinalData} 
-                columns={columns}
-                selected-rows={list_SelectedData} 
-                sorted-by={sortedBy} 
-                sorted-direction={sortedDirection}
-                onsort={updateColumnSorting} 
-                onrowaction={onRowAction} 
-                onrowselection={handleRowSelection}
-                show-row-number-column="true" 
-                class="custom-table">
+            <lightning-datatable key-field="stDownloadId" data-id="datatable" data={list_FinalData} columns={columns}
+                selected-rows={list_SelectedData} sorted-by={sortedBy} sorted-direction={sortedDirection}
+                onsort={updateColumnSorting} onrowaction={onRowAction} onrowselection={handleRowSelection}
+                show-row-number-column="true" class="custom-table">
             </lightning-datatable>
         </div>
     </template>
