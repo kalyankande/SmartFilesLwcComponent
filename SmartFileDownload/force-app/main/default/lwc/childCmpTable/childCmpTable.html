@@ -1,103 +1,158 @@
+<!--
+* 
+* @ Name            :   Smart Files (LWC COMPONENT)
+* @ Purpose         :   This component allows you to pick multiple Attachments files at once, delete them, download them, and upload them.
+* @ Author          :   Kalyan Kande
+*
+*   Date            |  Developer Name                 |  Version      |  Changes
+* =================================================================================================================
+*   20-02-2023      |  kande.kalyan@absyz.com         |  1.0          |  Initial Version
+*   25-05-2023      |  kande.kalyan@absyz.com         |  1.1          |  Added Multiple delete
+*
+-->
 <template>
-    <lightning-spinner if:true={bSpinner} alternative-text="Loading" size="small">
-  </lightning-spinner>
-    
-    <div class="slds-theme_default">
-      
-      <!-- Page Header -->
-      <lightning-layout horizontal-align="spread" vertical-align="center" class="slds-page-header slds-card_boundary"
-        multiple-rows>
-        <lightning-layout-item class="custom-padding">
-          <lightning-layout horizontal-align="start" vertical-align="center">
-            <lightning-layout-item>
-              <!-- Page Icon -->
-              <lightning-icon icon-name={iconName} alternative-text={title} title={title}></lightning-icon>
-            </lightning-layout-item>
-            <lightning-layout-item padding="horizontal-small">
-              <h1>
-                <!-- Page Title -->
-                <span class="slds-page-header__title slds-truncate" title={title}>{title}</span>
-              </h1>
-              <!-- Pop over to show the warnings -->
-              <template if:true={bWarning}>
-                <div class="slds-media slds-media_center slds-has-flexi-truncate slds-popover_warning">
-                  <div class="slds-media__body">
-                    <p class="slds-page-header__name-meta">{stCustomLabel}</p>
-                  </div>
-                  <div class="slds-media__figure">
-                    <lightning-icon icon-name="utility:warning" size="small" alternative-text="Warning!" title="Warning"
-                      variant="warning"></lightning-icon>
-                  </div>
-                </div>
-              </template>
-            </lightning-layout-item>
-          </lightning-layout>
-        </lightning-layout-item>
-        <template if:true={bIconFilter}>
-          <lightning-layout-item class="custom-align custom-padding">
-            <lightning-button-group>
-              <!-- Iterate over the list of icons and display them -->
-              <template for:each={icons} for:item="icon">
-                <lightning-button key={icon.name} label={icon.name} icon-name={icon.filetype} icon-position="left" 
-                  variant={icon.variant} onclick={handleTypeFilter}></lightning-button>
-              </template>
-              <lightning-button-icon icon-name="utility:close" onclick={updateToDefault} variant="border-filled"
-                alternative-text="Close"></lightning-button-icon>
-            </lightning-button-group>
-          </lightning-layout-item>
-        </template>
-        <lightning-layout-item class="custom-align custom-padding">
-          <!-- Page Buttons -->
-  
-          <lightning-button-group>
-            <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh"
-              onclick={handleRefresh} variant="border-filled"></lightning-button-icon>
-            <lightning-button label={buttonLabelv2} title={buttonLabelv2} onclick={handleClickv3} disabled={bDisabled}>
-            </lightning-button>
-            <lightning-button label={buttonLabel} title={buttonLabel} onclick={handleClickv2} disabled={bDisabled}>
-            </lightning-button>
-            <!-- Create a dropdown button menu with options -->
-            <lightning-button-menu alternative-text="Show menu" menu-alignment="auto" variant="border-filled">
-              <lightning-file-upload name="fileUploader" multiple record-id={recordId} class="custom-fileupload"
-                onuploadfinished={handleRefresh}></lightning-file-upload>
-              <lightning-menu-item value="View" label="Standard View" onclick={handleMenuSelect}></lightning-menu-item>
-            </lightning-button-menu>
-          </lightning-button-group>
-        </lightning-layout-item>
-      </lightning-layout>
-  
+    <div if:true={blnSpinner} class="slds-is-relative">
+        <lightning-spinner alternative-text="Loading..." variant="brand">
+        </lightning-spinner>
     </div>
-  
-  
-    <template if:true={bEnableTable}>
-      <div class="ligtning-table-cc">
-  
-        <lightning-datatable key-field="stDownloadId" 
-        data={finalData} 
-        columns={columns} 
-        selected-rows={selectedData}
-        sorted-by={sortedBy} 
-        sorted-direction={sortedDirection} 
-        onsort={updateColumnSorting}
-        onrowaction={previewHandler}
-        onrowselection={getSelectedName} 
-        show-row-number-column="true" 
-        class="custom-table">
-        </lightning-datatable>
-      </div>
+    <div class="slds-theme_default">
+        <!-- Page Header -->
+        <lightning-layout horizontal-align="spread" vertical-align="center" class="slds-page-header slds-card_boundary"
+            multiple-rows>
+            <lightning-layout-item class="custom-padding">
+                <lightning-layout horizontal-align="start" vertical-align="center">
+                    <lightning-layout-item>
+                        <!-- Page Icon -->
+                        <lightning-icon icon-name={iconName} alternative-text={strTitle}
+                            title={strTitle}></lightning-icon>
+                    </lightning-layout-item>
+                    <lightning-layout-item padding="horizontal-small">
+                        <h1>
+                            <!-- Page Title -->
+                            <span class="slds-page-header__title slds-truncate" title={strTitle}>{strTitle}</span>
+                        </h1>
+                        <!-- Pop over to show the warnings -->
+                        <template if:true={blnWarning}>
+                            <div class="slds-media slds-media_center slds-has-flexi-truncate slds-popover_warning">
+                                <div class="slds-media__body">
+                                    <p class="slds-page-header__name-meta">{strCustomLabel}</p>
+                                </div>
+                                <div class="slds-media__figure">
+                                    <lightning-icon icon-name="utility:warning" size="small" alternative-text="Warning!"
+                                        title="Warning" variant="warning"></lightning-icon>
+                                </div>
+                            </div>
+                        </template>
+                    </lightning-layout-item>
+                </lightning-layout>
+            </lightning-layout-item>
+            <template if:true={blnIconFilter}>
+                <lightning-layout-item class="custom-align custom-padding">
+                    <lightning-button-group>
+                        <!-- Iterate over the list of icons and display them -->
+                        <template for:each={list_Icons} for:item="icon">
+                            <lightning-button key={icon.name} label={icon.name} icon-name={icon.filetype}
+                                icon-position="left" variant={icon.variant}
+                                onclick={handleTypeFilter}></lightning-button>
+                        </template>
+                        <lightning-button-icon icon-name="utility:close" onclick={updateToDefault}
+                            variant="border-filled" alternative-text="Close"></lightning-button-icon>
+                    </lightning-button-group>
+                </lightning-layout-item>
+            </template>
+            <lightning-layout-item class="custom-align custom-padding">
+                <!-- Page Buttons -->
+                <template if:true={blnSearchEnabled}>
+                    <lightning-button-group>
+                        <lightning-input type="search" label="Search Account" onchange={handleEnableSearch}
+                            variant="label-hidden"></lightning-input>
+                        <lightning-button-icon icon-name="utility:close" onclick={disableSearch} variant="border-filled"
+                            alternative-text="Close"></lightning-button-icon>
+                    </lightning-button-group>
+                </template>
+                <lightning-button-group>
+                    <template if:true={blnSearchIconEnabled}>
+                        <lightning-button-icon icon-name="utility:search" alternative-text="Search" title="Search"
+                            onclick={handleSearchBtn} variant="border-filled"></lightning-button-icon>
+                    </template>
+                    <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" title="Refresh"
+                        onclick={btnHandleRefresh} variant="border-filled"></lightning-button-icon>
+                    <lightning-button label={strButtonLabelv2} title={strButtonLabelv2} onclick={btnDownload}
+                        disabled={blnDisabled}>
+                    </lightning-button>
+                    <lightning-button label={strButtonLabel} title={strButtonLabel} onclick={btnDownloadasZip}
+                        disabled={blnDisabled}>
+                    </lightning-button>
+                    <!-- Create a dropdown button menu with options -->
+                    <lightning-button-menu menu-alignment="auto" variant="border-filled">
+                        <lightning-file-upload name="fileUploader" multiple record-id={recordId}
+                            class="custom-fileupload" onuploadfinished={btnHandleRefresh}></lightning-file-upload>
+                        <lightning-menu-item value="View" label="Standard View"
+                            onclick={handleMenuSelect}></lightning-menu-item>
+                        <lightning-menu-item value="View" label="Delete Files" onclick={handleDeleteClickconformation}>
+                        </lightning-menu-item>
+                    </lightning-button-menu>
+                </lightning-button-group>
+            </lightning-layout-item>
+        </lightning-layout>
+    </div>
+    <template if:true={blnEnableTable}>
+        <div class="ligtning-table-cc">
+            <lightning-datatable key-field="stDownloadId" 
+                data-id="datatable" 
+                data={list_FinalData} 
+                columns={columns}
+                selected-rows={list_SelectedData} 
+                sorted-by={sortedBy} 
+                sorted-direction={sortedDirection}
+                onsort={updateColumnSorting} 
+                onrowaction={onRowAction} 
+                onrowselection={handleRowSelection}
+                show-row-number-column="true" 
+                class="custom-table">
+            </lightning-datatable>
+        </div>
     </template>
-    <template if:true={bError}>
-      <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
-          <lightning-layout horizontal-align="center" vertical-align="center" multiple-rows>
-              <lightning-layout-item size="auto">
-                  <lightning-icon icon-name="utility:error" size="small" alternative-text="Error"></lightning-icon>
-              </lightning-layout-item>
-              <lightning-layout-item size="auto">
-                  <h2>Error: {stErrorMessage}</h2>
-              </lightning-layout-item>
-          </lightning-layout>
-      </div>
-  </template>
-  
-    
-  </template>
+    <template if:true={blnError}>
+        <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
+            <lightning-layout horizontal-align="center" vertical-align="center" multiple-rows>
+                <lightning-layout-item size="auto">
+                    <lightning-icon icon-name="utility:error" size="small" alternative-text="Error"></lightning-icon>
+                </lightning-layout-item>
+                <lightning-layout-item size="auto">
+                    <h2>Error: {strErrorMessage}</h2>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+    </template>
+    <template if:true={blnConformationDelete}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small">
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Confirm Delete</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <p><b>Are you sure you want to delete?
+                        </b></p>
+                </div>
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={submitDetails} title="OK">OK</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,10 +1,18 @@
-import {LightningElement,    api,    track} from 'lwc';
-//import {    ShowToastEvent} from 'lightning/platformShowToastEvent';
-//import {    loadScript,    loadStyle} from 'lightning/platformResourceLoader';
+import { LightningElement, api, track} from 'lwc';
+import {
+    ShowToastEvent
+} from 'lightning/platformShowToastEvent';
 import CLSFD0005 from '@salesforce/label/c.CLSFD0005';
+import {
+    deleteRecord
+} from 'lightning/uiRecordApi';
 //import getIcon from '@salesforce/resourceUrl/getIcon';
-import {NavigationMixin} from 'lightning/navigation';
-import getAttachments from '@salesforce/apex/SD_ClassDownloadAll.getAttachments'
+import {
+    NavigationMixin
+} from 'lightning/navigation';
+import getAttachments from '@salesforce/apex/SD_ClassDownloadAll.getAttachments';
+import deleteSelectedFiles from '@salesforce/apex/SD_ClassDownloadAll.deleteSelectedFiles';
+
 const actions = [{
         label: 'Preview',
         name: 'view'
@@ -76,54 +84,37 @@ const columns = [{
 
 export default class childCmpTable extends NavigationMixin(LightningElement) {
     // Attributes to display error messages and warnings
-    @track stErrorMessage ='No Files';
-    @track bError = true;
-    @track bWarning = false;
-    @track stCustomLabel = CLSFD0005;
-
-    // Attributes to store platform details
-    @track stCommunity;
-    @track bLightningExperience = false;
-
+    @track strErrorMessage = 'No Files';
+    @track blnError = false;
+    @track blnWarning = false;
+    @track strCustomLabel = CLSFD0005;
     // To toggle spinner
-    @track bSpinner = false;
-    @api bDirect;
+    @track blnSpinner = false;
     // Attributes for Data table
-    @track backupData = [];
-    @track data = [];
-    @track selectedData = [];
-    @track allSelectedData = [];
-    @track selectedMap = {};
+    @track list_BackupData = [];
+    @track list_Data = [];
+    @track list_SelectedData = [];
     @track columns = columns;
-    @track sortedDirection = 'asc';
     @track sortedBy;
-
     // Attributes for Lightning Data Service
-    @api currentRecord;
     @api recordId;
-    
     // Attribute Map with Key as Id and Value as Version data
-    @track fileBodyMap = {};
-    @track icons = [];
-    
-
+    @track list_Icons = [];
+    @api blnIconFilter;
     // Attributes to display details and actions
-    @track title = 'Smart Download';
-    @track iconName = 'standard:document';
-    @track buttonLabel = 'Download As Zip';
-    @track buttonLabelv2 = 'Download';
-    @track bDisabled = true;
-    @track bEnableTable = false;
-    @api bIconFilter =false;
+    @track strTitle = "Smart Download";
+    @track iconName = "standard:document";
+    @track strButtonLabel = "Download As Zip";
+    @track strButtonLabelv2 = "Download";
+    @track blnDisabled = true;
+    @track blnEnableTable = false;
     @track bEnableFilter;
-    @track finalData = [];
-    @track sortedBy;
+    @track list_FinalData = [];
     @track sortedDirection;
-    @track sortColumns = [];
-    @track defaultSort = 'asc';
-    
-
-
+    @track str_DefaultSort = "asc";
+    @track blnConformationDelete = false;
+    @track blnSearchEnabled = false;
+    @track blnSearchIconEnabled = true;
     constructor() {
         super();
         const style = document.createElement('style');
@@ -135,103 +126,74 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
             height:2rem;
         }`;
         document.querySelector('head').appendChild(style);
-
     }
-
     connectedCallback() {
         this.init();
-        
     }
     init() {
-        this.bSpinner = true;
-
+        this.blnSpinner = true;
         this.getData();
-        
     }
-
-
     getData() {
-
         getAttachments({
                 stRecordId: this.recordId
             })
-
             .then((result) => {
-                if(result.length==0){
-                    this.berror =true;
-
-                }
-                else{
-
-
-                
-                
-                var tempData = [];
-                var icontype = [];
-                this.icons=[];
-                for (let i = 0; i < result.length; i++) {
-                    // var temp=result[i].recordList;
-                    
-                    this.data = result[i].recordList;
-                    
-
-                    const map = new Map();
-                    for (let j = 0; j < this.data.length; j++) {
-
-                        var size = this.updateContentSize(this.data[j].inContentSize);
-                         var tempicontype = this.iconType(this.data[j].stExtension);
-                        var tempStoreData = {
-                            stTitle: this.data[j].stTitle,
-                            stOwnerId: this.data[j].stOwnerId,
-                            dtModifiedDate: this.data[j].dtModifiedDate,
-                            size: size,
-                            stOwner: this.data[j].stOwner,
-                            stExtension: tempicontype,
-                            stDownloadId: this.data[j].stDownloadId, 
-                            fileExtension :this.data[j].stExtension
-
+                if (result[0].stMessage == "No Files") {
+                    this.blnError = true;
+                    this.blnSpinner = false;
+                    this.blnEnableTable = false;
+                } else {
+                    var tempData = [];
+                    var icontype = [];
+                    this.list_Icons = [];
+                    for (let i = 0; i < result.length; i++) {
+                        this.list_Data = result[i].recordList;
+                        const map = new Map();
+                        for (let j = 0; j < this.list_Data.length; j++) {
+                            var size = this.updateContentSize(this.list_Data[j].inContentSize);
+                            var tempicontype = this.iconType(this.list_Data[j].stExtension);
+                            var tempStoreData = {
+                                stTitle: this.list_Data[j].stTitle,
+                                stOwnerId: this.list_Data[j].stOwnerId,
+                                dtModifiedDate: this.list_Data[j].dtModifiedDate,
+                                size: size,
+                                stOwner: this.list_Data[j].stOwner,
+                                stExtension: tempicontype,
+                                stDownloadId: this.list_Data[j].stDownloadId,
+                                fileExtension: this.list_Data[j].stExtension
+                            }
+                            tempData.push(tempStoreData);
+                            icontype.push(tempicontype);
+                            map.set(tempicontype, this.list_Data[j].stExtension);
                         }
-                        tempData.push(tempStoreData);
-                        icontype.push(tempicontype);
-                        map.set(tempicontype,this.data[j].stExtension);    
-                    }
-                    console.log('map',map);
-                    var tempicons = Array.from(new Set(icontype));
-                    
-                    for(let i=0;i<tempicons.length;i++){
-                        let tempMap  = {
-                            'name' :map.get(tempicons[i]).toUpperCase(),
-                            'filetype' :tempicons[i]
-                            
-                           };
-                       this.icons.push(tempMap); 
-                       console.log('this.icons',JSON.stringify(this.icons));
-    
-    
-                     }
-                }
-             
-                this.bDisabled = false;
-                this.finalData = tempData;
-                this.backupData =tempData;
-                console.log('backupData',this.backupData);
-                let data_clone = JSON.parse(JSON.stringify(this.finalData));
-                this.finalData = data_clone.sort(this.sortBy('dtModifiedDate', this.defaultSort));
-                this.bEnableTable = true;
-                this.bSpinner = false;
-                this.bError=false;
-            }
+                        var tempicons = Array.from(new Set(icontype));
 
-                 
+                        for (let i = 0; i < tempicons.length; i++) {
+                            let tempMap = {
+                                'name': map.get(tempicons[i]).toUpperCase(),
+                                'filetype': tempicons[i]
+
+                            };
+                            this.list_Icons.push(tempMap);
+                        }
+                    }
+                    this.blnDisabled = false;
+                    this.list_FinalData = tempData;
+                    this.blnWarning = false;
+                    let data_clone = JSON.parse(JSON.stringify(this.list_FinalData));
+                    this.list_FinalData = data_clone.sort(this.sortBy('dtModifiedDate', this.str_DefaultSort));
+                    this.list_BackupData = this.list_FinalData;
+                    this.blnEnableTable = true;
+                    this.blnSpinner = false;
+                    this.blnError = false;
+                }
             })
             .catch((error) => {
                 console.log(JSON.stringify(error));
-                // this.handleError(error);
-                this.bSpinner = false;
+                this.blnSpinner = false;
             });
     }
-
-
     updateContentSize(stSize) {
         if (stSize > 0) {
             stSize = stSize / 1024;
@@ -252,40 +214,40 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
             return '0 KB';
         }
     }
-    iconType(stType) {
+    iconType(strType) {
         var iconName = "";
         var name = "";
-        if (stType === "xls" || stType === "xlsx") {
+        if (strType === "xls" || strType === "xlsx") {
             iconName = "doctype:excel";
             name = "XLS";
-        } else if (stType === "doc" || stType === "docx") {
+        } else if (strType === "doc" || strType === "docx") {
             iconName = "doctype:word";
             name = "DOC";
-        } else if (stType === "ppt" || stType === "pptx") {
+        } else if (strType === "ppt" || strType === "pptx") {
             iconName = "doctype:ppt";
             name = "PPT";
-        } else if (stType === "pdf") {
+        } else if (strType === "pdf") {
             iconName = "doctype:pdf";
             name = "PDF";
-        } else if (stType === "txt") {
+        } else if (strType === "txt") {
             iconName = "doctype:txt";
             name = "TXT";
-        } else if (stType === "html") {
+        } else if (strType === "html") {
             iconName = "doctype:html";
             name = "HTML";
-        } else if (stType === "csv") {
+        } else if (strType === "csv") {
             iconName = "doctype:csv";
             name = "CSV";
-        } else if (stType === "zip" || stType === "rar") {
+        } else if (strType === "zip" || strType === "rar") {
             iconName = "doctype:zip";
             name = "ZIP";
-        } else if (stType === "xml") {
+        } else if (strType === "xml") {
             iconName = "doctype:xml";
             name = "XML";
-        } else if (stType === "mp4") {
+        } else if (strType === "mp4") {
             iconName = "doctype:mp4";
             name = "MP4";
-        } else if (stType === "png" || stType === "jpg" || stType === "jpeg" || stType === "bmp" || stType === "gif") {
+        } else if (strType === "png" || strType === "jpg" || strType === "jpeg" || strType === "bmp" || strType === "gif") {
             iconName = "doctype:image";
             name = "IMG";
         } else {
@@ -302,48 +264,35 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
         // assign the latest attribute with the sorted column fieldName and sorted direction
         this.sortedBy = fieldName1;
         this.sortedDirection = sortDirection;
-        console.log('Sort fieldName: ' + fieldName);
-        console.log('sort direction: ' + sortDirection);
 
         let reverse = sortDirection !== 'asc';
 
-        let data_clone = JSON.parse(JSON.stringify(this.finalData));
+        let data_clone = JSON.parse(JSON.stringify(this.list_FinalData));
 
         console.log('BEFORE data_clone:' + JSON.stringify(data_clone));
 
         if (fieldName1 == 'icon') {
-            this.finalData = data_clone.sort(this.sortBy(fieldName, reverse));
+            this.list_FinalData = data_clone.sort(this.sortBy(fieldName, reverse));
         } else {
-            this.finalData = data_clone.sort(this.sortBy(fieldName1, reverse));
+            this.list_FinalData = data_clone.sort(this.sortBy(fieldName1, reverse));
 
         }
-        console.log('AFTER data_clone:' + JSON.stringify(data_clone));
-
     }
-
     sortBy(field, reverse, primer) {
-
-        console.log('Sort by:reverse:' + reverse);
-
         var key = function (x) {
             return primer ? primer(x[field]) : x[field]
         };
-
         return function (a, b) {
             var A = key(a),
                 B = key(b);
-
             if (A === undefined) A = '';
             if (B === undefined) B = '';
-
             return (A < B ? -1 : (A > B ? 1 : 0)) * [1, -1][+!!reverse];
         }
     }
-    handleClickv3() {
-
+    btnDownload() {
         let selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
         let selectedFiles = [];
-
         for (let i = 0; i < selectedRows.length; i++) {
             let file = selectedRows[i];
             console.log('file' + i);
@@ -353,19 +302,16 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
             });
         }
         if (selectedFiles == 0) {
-            this.bWarning = true;
+            this.blnWarning = true;
         } else {
             for (let i = 0; i < selectedFiles.length; i++) {
-                this.bWarning = false;
+                this.blnWarning = false;
                 this.downloadFiles(selectedFiles[i]);
                 setTimeout(() => {}, 100000);
             }
             console.log('Downloaded SUCCESSFULLY');
-
         }
-
     }
-
     downloadFiles(selectedFiles) {
         let file = selectedFiles;
 
@@ -375,7 +321,7 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
         console.log('id', file.ContentDocumentId);
 
     }
-    previewHandler(event) {
+    onRowAction(event) {
         const actionName = event.detail.action.name;
         console.log(actionName);
         const row = event.detail.row;
@@ -396,14 +342,32 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
                 });
                 break;
             case 'delete':
-                this.delAccount(row);
-                break;
+                console.log("row.stDownloadId" + row.stDownloadId);
+                deleteRecord(row.stDownloadId)
+                    .then(() => {
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Success',
+                                message: 'Record deleted',
+                                variant: 'success'
+                            })
 
+                        );
+                        this.btnHandleRefresh();
+                    })
+                    .catch(error => {
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Error deleting record',
+                                message: error.body.message,
+                                variant: 'error'
+                            })
+                        );
+                    });
 
         }
     }
-
-    handleRefresh(event) {
+    @api btnHandleRefresh(event) {
         this.init();
     }
     handleMenuSelect() {
@@ -411,15 +375,56 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
             type: 'standard__recordRelationshipPage',
             attributes: {
                 recordId: this.recordId,
-                objectApiName: 'Account',
+                //objectApiName: 'Account',
                 relationshipApiName: 'CombinedAttachments',
                 actionName: 'view'
             }
         });
 
     }
+    handleSelectedDelete() {
+        let selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
+        let selectedFiles = [];
 
-    handleClickv2() {
+        for (let i = 0; i < selectedRows.length; i++) {
+            let file = selectedRows[i];
+            selectedFiles.push(
+                file.stDownloadId
+            );
+        }
+        console.log('selectedFiles:' + JSON.stringify(selectedFiles));
+        console.log(this.recordId);
+
+        deleteSelectedFiles({
+                'selectedFilesList': selectedFiles
+            })
+            .then(result => {
+                console.log('Saved selected tasks:', result);
+                if (result == 'Success') {
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Success',
+                            message: 'Records deleted',
+                            variant: 'success'
+                        })
+
+                    );
+                    this.btnHandleRefresh();
+                }
+            })
+            .catch(error => {
+
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error deleting record',
+                        message: error.body.message,
+                        variant: 'error'
+                    })
+                );
+            });
+
+    }
+    btnDownloadasZip() {
         let selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
         let selectedFiles = [];
 
@@ -430,15 +435,14 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
         }
         console.log('selected files ', selectedFiles);
         if (selectedFiles.length == 0) {
-            this.bWarning = true;
+            this.blnWarning = true;
         } else {
-            this.bWarning = false;
+            this.blnWarning = false;
             this.downloadSelectedZipFiles(selectedFiles);
             console.log('Downloaded SUCCESSFULLY');
         }
     }
-
-    @api downloadSelectedZipFiles(selectedFiles) {
+    downloadSelectedZipFiles(selectedFiles) {
 
         let fileDataList = JSON.parse(JSON.stringify(selectedFiles));
         console.log('zip', selectedFiles);
@@ -454,64 +458,155 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
 
         let fileUrl = '/sfc/servlet.shepherd/document/download/' + fileIdsString;
         const fileWindow = window.open(fileUrl, '_blank');
-
     }
     handleTypeFilter(event) {
         let name = event.target.label;
-        // console.log('fileType'+fileType);
-        this.finalData = this.backupData.filter(item => item.fileExtension.toUpperCase() === name);
+        this.list_FinalData = this.list_BackupData.filter(item => item.fileExtension.toUpperCase() === name);
 
-        for (let i = 0; i < this.icons.length; i++) {
-            this.icons[i].variant = null;
-            if(this.icons[i].name === name) {
-                this.icons[i].variant = "brand";
+        for (let i = 0; i < this.list_Icons.length; i++) {
+
+            this.list_Icons[i].variant = null;
+            if (this.list_Icons[i].name === name) {
+                this.list_Icons[i].variant = "brand";
             }
         }
-        console.log('icon',this.icons);
     }
-    updateToDefault(){
-        this.finalData = this.backupData;
-        for (let i = 0; i < this.icons.length; i++) {
-            this.icons[i].variant = null;
+    updateToDefault() {
+        this.list_FinalData = this.list_BackupData;
+        for (let i = 0; i < this.list_Icons.length; i++) {
+            this.list_Icons[i].variant = null;
         }
+        this.template.querySelector('[data-id="datatable"]').selectedRows = this.list_SelectedData;
 
     }
-
     getSelectedName(event) {
         const selectedRows = event.detail.selectedRows;
-        if(selectedRows.length != 0) {
-            this.bWarning = false;
+        if (selectedRows.length != 0) {
+            this.blnWarning = false;
         }
     }
+    @api downloadAllFilesZip() {
+        let selectedRows = this.list_FinalData;
+        let selectedFiles = [];
 
-    @api test(){
-        console.log('Hello');
+        for (let i = 0; i < selectedRows.length; i++) {
+            let file = selectedRows[i];
+            console.log('file' + i);
+            selectedFiles.push(file.stDownloadId);
+        }
+        console.log('selected files ', selectedFiles);
+        if (selectedFiles.length == 0) {
+            // this.blnWarning = true;
+        } else {
+            this.blnWarning = false;
+            this.downloadSelectedZipFiles(selectedFiles);
+            console.log('Downloaded SUCCESSFULLY');
+        }
+    }
+    handleDeleteClickconformation() {
+        let selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
+        let selectedFiles = [];
+
+        for (let i = 0; i < selectedRows.length; i++) {
+            let file = selectedRows[i];
+            console.log('file' + i);
+            selectedFiles.push(
+                file.stDownloadId
+            );
+        }
+        if (selectedFiles == 0) {
+            this.blnWarning = true;
+        } else {
+            this.blnConformationDelete = true;
+        }
+    }
+    closeModal() {
+        this.blnConformationDelete = false;
+    }
+    submitDetails() {
+
+        this.handleSelectedDelete();
+        this.blnConformationDelete = false;
+    }
+    handleSearchBtn() {
+        this.blnSearchEnabled = true;
+        this.blnSearchIconEnabled = false;
+    }
+    disableSearch() {
+        this.blnSearchEnabled = false;
+        this.blnSearchIconEnabled = true;
+        this.list_FinalData = this.list_BackupData;
+        this.template.querySelector('[data-id="datatable"]').selectedRows = this.list_SelectedData;
+
     }
 
-    @api 
-    downloadAllFilesZip(){
-        console.log('514');
-        
-            let selectedRows = this.finalData;
-            let selectedFiles = [];
-    
-            for (let i = 0; i < selectedRows.length; i++) {
-                let file = selectedRows[i];
-                console.log('file' + i);
-                selectedFiles.push(file.stDownloadId);
-            }
-            console.log('selected files ', selectedFiles);
-            if (selectedFiles.length == 0) {
-               // this.bWarning = true;
-            } else {
-                this.bWarning = false;
-                this.downloadSelectedZipFiles(selectedFiles);
-                console.log('Downloaded SUCCESSFULLY');
-            }
-    
-    
-        
+    handleEnableSearch(event) {
+        const searchKey = event.target.value.toLowerCase();
+        if (searchKey) {
+            this.list_FinalData = this.list_BackupData;
 
+            if (this.list_FinalData) {
+                let searchRecords = [];
+
+                for (let record of this.list_FinalData) {
+                    let valuesArray = Object.values(record);
+
+                    for (let val of valuesArray) {
+                        console.log('val is ' + val);
+                        let strVal = String(val);
+
+                        if (strVal) {
+
+                            if (strVal.toLowerCase().startsWith(searchKey)) {
+                                searchRecords.push(record);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                console.log('Matched Accounts are ' + JSON.stringify(searchRecords));
+                this.list_FinalData = searchRecords;
+
+            }
+        } else {
+            this.list_FinalData = this.list_BackupData;
+        }
+        this.template.querySelector('[data-id="datatable"]').selectedRows = this.list_SelectedData;
+    }
+    handleRowSelection(event) {
+        const selectedRows = event.detail.selectedRows;
+        if (selectedRows.length != 0) {
+            this.blnWarning = false;
         }
 
+        let updatedItemsSet = new Set();
+        // List of selected items we maintain.
+        let selectedItemsSet = new Set(this.list_SelectedData);
+        // List of items currently loaded for the current view.
+        let loadedItemsSet = new Set();
+        this.list_FinalData.map((ele) => {
+            loadedItemsSet.add(ele.stDownloadId);
+        });
+        console.log('loadedItemsSet', loadedItemsSet);
+        if (event.detail.selectedRows) {
+            event.detail.selectedRows.map((ele) => {
+                updatedItemsSet.add(ele.stDownloadId);
+            });
+            // Add any new items to the selectedRows list
+            updatedItemsSet.forEach((stDownloadId) => {
+                if (!selectedItemsSet.has(stDownloadId)) {
+                    selectedItemsSet.add(stDownloadId);
+                }
+            });
+        }
+        loadedItemsSet.forEach((stDownloadId) => {
+            if (selectedItemsSet.has(stDownloadId) && !updatedItemsSet.has(stDownloadId)) {
+                // Remove any items that were unselected.
+                selectedItemsSet.delete(stDownloadId);
+            }
+        });
+        this.list_SelectedData = [...selectedItemsSet];
+        console.log('selectedRows==> ' + JSON.stringify(this.list_SelectedData));
+    }
 }

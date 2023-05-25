@@ -8,6 +8,7 @@
 * Date          | Developer Name              | Version   | Changes
 * ====================================================================================================
 * 17-04-2020    | pradeep.chary@absyz.com     | 1.0       | Initial Version
+* 25-05-2023    | kande.kalyan@absyz.com     | 2.0       | Modified Version
 *
 *****************************************************************************************************/
 
@@ -22,7 +23,7 @@ public with sharing class SD_ClassDownloadAll {
     @AuraEnabled
     public static List<detailsClass> getAttachments(String stRecordId) {
         
-            String theme = UserInfo.getUiThemeDisplayed();
+        String theme = UserInfo.getUiThemeDisplayed();
         String CLSFD0001 = System.Label.CLSFD0001;  // No Files
         String CLSFD0002 = System.Label.CLSFD0002;  // Record does not exist
         String CLSFD0003 = System.Label.CLSFD0003;  // Please check record Id and object
@@ -171,4 +172,21 @@ public with sharing class SD_ClassDownloadAll {
         
         public attachmentClass() {}
     }
+    @AuraEnabled
+    public static String deleteSelectedFiles(List<String> selectedFilesList) {
+        try {
+            List<ContentDocument> selectedFiles = [SELECT Id FROM ContentDocument WHERE Id IN :selectedFilesList];
+            if (!selectedFiles.isEmpty()) {
+                delete selectedFiles;
+            }
+            List<ContentDocument> checkForFiles = [SELECT Id FROM ContentDocument WHERE Id IN :selectedFilesList];
+            if (checkForFiles.isEmpty()) {
+                return 'Success';
+            }
+        } catch (Exception e) {
+            System.debug('An exception occurred: ' + e.getMessage());
+        }
+        return 'Error';
+    }
+    
 }
