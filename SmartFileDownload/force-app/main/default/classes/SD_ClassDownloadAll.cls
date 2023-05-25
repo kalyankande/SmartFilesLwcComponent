@@ -14,11 +14,11 @@
 
 public with sharing class SD_ClassDownloadAll {
     
-/****************************************************************************************************
-* @desc     	: Returns the attachments under a generic object
-* @param    	: stRecordId
-* @return   	: LIST<detailsClass> wrapper object
-****************************************************************************************************/
+    /****************************************************************************************************
+    * @desc     	: Returns the attachments under a generic object
+    * @param    	: stRecordId
+    * @return   	: LIST<detailsClass> wrapper object
+    ****************************************************************************************************/
     
     @AuraEnabled
     public static List<detailsClass> getAttachments(String stRecordId) {

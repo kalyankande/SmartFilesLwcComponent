@@ -1,18 +1,11 @@
 import { LightningElement, api, track} from 'lwc';
-import {
-    ShowToastEvent
-} from 'lightning/platformShowToastEvent';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import CLSFD0005 from '@salesforce/label/c.CLSFD0005';
-import {
-    deleteRecord
-} from 'lightning/uiRecordApi';
+import { deleteRecord } from 'lightning/uiRecordApi';
 //import getIcon from '@salesforce/resourceUrl/getIcon';
-import {
-    NavigationMixin
-} from 'lightning/navigation';
+import { NavigationMixin } from 'lightning/navigation';
 import getAttachments from '@salesforce/apex/SD_ClassDownloadAll.getAttachments';
 import deleteSelectedFiles from '@salesforce/apex/SD_ClassDownloadAll.deleteSelectedFiles';
-
 const actions = [{
         label: 'Preview',
         name: 'view'
@@ -38,7 +31,6 @@ const columns = [{
             class: "custom-icon"
         }
     },
-
     {
         label: "Owner",
         fieldName: "stOwnerId",
@@ -60,7 +52,6 @@ const columns = [{
         sortable: "true",
         type: 'date',
         typeAttributes: {
-
             day: "numeric",
             month: "short",
             year: "numeric",
@@ -81,7 +72,6 @@ const columns = [{
         },
     },
 ];
-
 export default class childCmpTable extends NavigationMixin(LightningElement) {
     // Attributes to display error messages and warnings
     @track strErrorMessage = 'No Files';
@@ -264,18 +254,12 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
         // assign the latest attribute with the sorted column fieldName and sorted direction
         this.sortedBy = fieldName1;
         this.sortedDirection = sortDirection;
-
         let reverse = sortDirection !== 'asc';
-
         let data_clone = JSON.parse(JSON.stringify(this.list_FinalData));
-
-        console.log('BEFORE data_clone:' + JSON.stringify(data_clone));
-
-        if (fieldName1 == 'icon') {
+              if (fieldName1 == 'icon') {
             this.list_FinalData = data_clone.sort(this.sortBy(fieldName, reverse));
         } else {
             this.list_FinalData = data_clone.sort(this.sortBy(fieldName1, reverse));
-
         }
     }
     sortBy(field, reverse, primer) {
@@ -314,12 +298,9 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
     }
     downloadFiles(selectedFiles) {
         let file = selectedFiles;
-
         let fileUrl = '/sfc/servlet.shepherd/document/download/' + file.ContentDocumentId;
-
         const fileWindow = window.open(fileUrl, '_blank');
         console.log('id', file.ContentDocumentId);
-
     }
     onRowAction(event) {
         const actionName = event.detail.action.name;
@@ -364,7 +345,6 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
                             })
                         );
                     });
-
         }
     }
     @api btnHandleRefresh(event) {
@@ -380,12 +360,10 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
                 actionName: 'view'
             }
         });
-
     }
     handleSelectedDelete() {
         let selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
         let selectedFiles = [];
-
         for (let i = 0; i < selectedRows.length; i++) {
             let file = selectedRows[i];
             selectedFiles.push(
@@ -393,8 +371,6 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
             );
         }
         console.log('selectedFiles:' + JSON.stringify(selectedFiles));
-        console.log(this.recordId);
-
         deleteSelectedFiles({
                 'selectedFilesList': selectedFiles
             })
@@ -422,12 +398,10 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
                     })
                 );
             });
-
     }
     btnDownloadasZip() {
         let selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
         let selectedFiles = [];
-
         for (let i = 0; i < selectedRows.length; i++) {
             let file = selectedRows[i];
             console.log('file' + i);
@@ -443,28 +417,21 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
         }
     }
     downloadSelectedZipFiles(selectedFiles) {
-
         let fileDataList = JSON.parse(JSON.stringify(selectedFiles));
-        console.log('zip', selectedFiles);
         let fileIdsString = '';
-
         for (let i in fileDataList) {
             fileIdsString += fileDataList[i] + '/';
         }
-
         if (fileIdsString.length > 0) {
             fileIdsString = fileIdsString.replace(/.$/, "?");
         }
-
         let fileUrl = '/sfc/servlet.shepherd/document/download/' + fileIdsString;
         const fileWindow = window.open(fileUrl, '_blank');
     }
     handleTypeFilter(event) {
         let name = event.target.label;
         this.list_FinalData = this.list_BackupData.filter(item => item.fileExtension.toUpperCase() === name);
-
         for (let i = 0; i < this.list_Icons.length; i++) {
-
             this.list_Icons[i].variant = null;
             if (this.list_Icons[i].name === name) {
                 this.list_Icons[i].variant = "brand";
@@ -477,7 +444,6 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
             this.list_Icons[i].variant = null;
         }
         this.template.querySelector('[data-id="datatable"]').selectedRows = this.list_SelectedData;
-
     }
     getSelectedName(event) {
         const selectedRows = event.detail.selectedRows;
@@ -488,7 +454,6 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
     @api downloadAllFilesZip() {
         let selectedRows = this.list_FinalData;
         let selectedFiles = [];
-
         for (let i = 0; i < selectedRows.length; i++) {
             let file = selectedRows[i];
             console.log('file' + i);
@@ -506,7 +471,6 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
     handleDeleteClickconformation() {
         let selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
         let selectedFiles = [];
-
         for (let i = 0; i < selectedRows.length; i++) {
             let file = selectedRows[i];
             console.log('file' + i);
@@ -537,26 +501,19 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
         this.blnSearchIconEnabled = true;
         this.list_FinalData = this.list_BackupData;
         this.template.querySelector('[data-id="datatable"]').selectedRows = this.list_SelectedData;
-
     }
-
     handleEnableSearch(event) {
         const searchKey = event.target.value.toLowerCase();
         if (searchKey) {
             this.list_FinalData = this.list_BackupData;
-
             if (this.list_FinalData) {
                 let searchRecords = [];
-
                 for (let record of this.list_FinalData) {
                     let valuesArray = Object.values(record);
-
                     for (let val of valuesArray) {
                         console.log('val is ' + val);
                         let strVal = String(val);
-
                         if (strVal) {
-
                             if (strVal.toLowerCase().startsWith(searchKey)) {
                                 searchRecords.push(record);
                                 break;
@@ -564,10 +521,8 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
                         }
                     }
                 }
-
-                console.log('Matched Accounts are ' + JSON.stringify(searchRecords));
+                console.log('Matched Files are ' + JSON.stringify(searchRecords));
                 this.list_FinalData = searchRecords;
-
             }
         } else {
             this.list_FinalData = this.list_BackupData;
@@ -579,7 +534,6 @@ export default class childCmpTable extends NavigationMixin(LightningElement) {
         if (selectedRows.length != 0) {
             this.blnWarning = false;
         }
-
         let updatedItemsSet = new Set();
         // List of selected items we maintain.
         let selectedItemsSet = new Set(this.list_SelectedData);
